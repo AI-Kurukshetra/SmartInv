@@ -11,7 +11,7 @@ type OrderRow = {
 
 type OrderItemRow = {
   qty: number;
-  products: { name: string; sku: string } | null;
+  products: { name: string; sku: string }[] | null;
 };
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
@@ -68,9 +68,9 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {items.map((item, index) => (
-                <tr key={`${item.products?.sku ?? "sku"}-${index}`} className="hover:bg-zinc-50">
-                  <td className="px-4 py-3 font-medium">{item.products?.name ?? "Unknown"}</td>
-                  <td className="px-4 py-3 text-zinc-500">{item.products?.sku ?? "-"}</td>
+                <tr key={`${item.products?.[0]?.sku ?? "sku"}-${index}`} className="hover:bg-zinc-50">
+                  <td className="px-4 py-3 font-medium">{item.products?.[0]?.name ?? "Unknown"}</td>
+                  <td className="px-4 py-3 text-zinc-500">{item.products?.[0]?.sku ?? "-"}</td>
                   <td className="px-4 py-3">{item.qty}</td>
                 </tr>
               ))}

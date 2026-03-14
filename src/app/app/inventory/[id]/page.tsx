@@ -12,18 +12,18 @@ type InventoryRow = {
   location_id: string;
   on_hand: number;
   reorder_point: number;
-  locations: { name: string } | null;
+  locations: { name: string }[] | null;
 };
 
 type OrderItemRow = {
   qty: number;
-  orders: { order_code: string; created_at: string; customer: string } | null;
+  orders: { order_code: string; created_at: string; customer: string }[] | null;
 };
 
 type PurchaseItemRow = {
   qty: number;
   unit_cost: number;
-  purchase_orders: { created_at: string; status: string; supplier_id: string | null } | null;
+  purchase_orders: { created_at: string; status: string; supplier_id: string | null }[] | null;
 };
 
 type SupplierRow = {
@@ -70,18 +70,20 @@ export default async function InventoryDetailPage({ params }: { params: { id: st
   const movements = [
     ...orderItems.map((item) => ({
       type: "Order",
-      date: item.orders?.created_at ?? "",
-      ref: item.orders?.order_code ?? "Order",
+      date: item.orders?.[0]?.created_at ?? "",
+      ref: item.orders?.[0]?.order_code ?? "Order",
       qty: -item.qty,
-      note: item.orders?.customer ?? "",
+      note: item.orders?.[0]?.customer ?? "",
     })),
     ...purchaseItems.map((item) => ({
       type: "Purchase",
-      date: item.purchase_orders?.created_at ?? "",
-      ref: item.purchase_orders?.status ?? "PO",
+      date: item.purchase_orders?.[0]?.created_at ?? "",
+      ref: item.purchase_orders?.[0]?.status ?? "PO",
       qty: item.qty,
       note:
-        item.purchase_orders?.supplier_id ? supplierNameById.get(item.purchase_orders.supplier_id) ?? "" : "",
+        item.purchase_orders?.[0]?.supplier_id
+          ? supplierNameById.get(item.purchase_orders[0].supplier_id) ?? ""
+          : "",
     })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -126,7 +128,7 @@ export default async function InventoryDetailPage({ params }: { params: { id: st
             <tbody className="divide-y divide-zinc-100">
               {inventoryRows.map((row) => (
                 <tr key={row.location_id} className="hover:bg-zinc-50">
-                  <td className="px-4 py-3 font-medium">{row.locations?.name ?? "Unknown"}</td>
+                  <td className="px-4 py-3 font-medium">{row.locations?.[0]?.name ?? "Unknown"}</td>
                   <td className="px-4 py-3">{row.on_hand}</td>
                   <td className="px-4 py-3">{row.reorder_point}</td>
                 </tr>

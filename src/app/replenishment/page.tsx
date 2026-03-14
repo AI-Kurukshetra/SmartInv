@@ -13,7 +13,7 @@ type InventoryRow = {
   location_id: string;
   on_hand: number;
   reorder_point: number;
-  locations: { name: string } | null;
+  locations: { name: string }[] | null;
 };
 
 type SupplierRow = {
@@ -27,7 +27,7 @@ type PurchaseOrderRow = {
   status: string;
   created_at: string;
   expected_at: string | null;
-  suppliers: { name: string } | null;
+  suppliers: { name: string }[] | null;
 };
 
 export default async function ReplenishmentPage() {
@@ -45,7 +45,11 @@ export default async function ReplenishmentPage() {
 
   const products = (productsRes.data ?? []) as ProductRow[];
   const inventory = (inventoryRes.data ?? []) as InventoryRow[];
-  const suppliers = (suppliersRes.data ?? []) as SupplierRow[];
+  const suppliers = ((suppliersRes.data ?? []) as SupplierRow[]).map((supplier) => ({
+    id: supplier.id,
+    name: supplier.name,
+    leadTimeDays: supplier.lead_time_days,
+  }));
   const purchaseOrders = (purchaseOrdersRes.data ?? []) as PurchaseOrderRow[];
 
   const productById = new Map(products.map((product) => [product.id, product]));
@@ -59,7 +63,7 @@ export default async function ReplenishmentPage() {
         productId: row.product_id,
         name: product?.name ?? "Unknown",
         sku: product?.sku ?? "-",
-        location: row.locations?.name ?? "Unknown",
+        location: row.locations?.[0]?.name ?? "Unknown",
         onHand: row.on_hand,
         reorderPoint: row.reorder_point,
         unitCost: product?.unit_cost ?? 0,
@@ -70,7 +74,7 @@ export default async function ReplenishmentPage() {
   const purchaseOrderList = purchaseOrders.map((po) => ({
     id: po.id,
     status: po.status,
-    supplier: po.suppliers?.name ?? "Unassigned",
+    supplier: po.suppliers?.[0]?.name ?? "Unassigned",
     createdAt: new Date(po.created_at).toLocaleDateString("en-IN"),
     expectedAt: po.expected_at,
   }));
